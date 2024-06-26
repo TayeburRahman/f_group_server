@@ -1,4 +1,4 @@
- 
+
 const groupsModels = require("../models/groups.models")
 
 
@@ -62,7 +62,11 @@ const joinGroup = async (req, res) => {
                 group.members.push(userId);
             }
             await group.save();
-            res.status(200).json({ message: 'Joined group successfully!' });
+            res.status(200).json({
+                message: 'Joined group successfully!',
+                group,
+                status: "success"
+            });
         } else {
             // Private group: Send join request
             const existingRequest = group.joinRequests.find(request => request.user._id.toString() === userId); // Use populated user object
@@ -70,7 +74,11 @@ const joinGroup = async (req, res) => {
                 const newUserRequest = { user: userId }; // Use user ID as reference
                 group.joinRequests.push(newUserRequest);
                 await group.save();
-                res.status(200).json({ message: 'Join request sent!' });
+                res.status(200).json({
+                    group,
+                    message: 'Join request sent!',
+                    status: "success",
+                });
             } else {
                 res.status(400).json({ message: 'Join request already sent.' });
             }
@@ -113,7 +121,11 @@ const acceptJoinRequest = async (req, res) => {
         group.joinRequests.splice(requestIndex, 1);
 
         await group.save();
-        res.status(200).json({ message: 'Joined Request accepted successfully!' });
+        res.status(200).json({
+            message: 'Joined Request accepted successfully!',
+            group,
+            status: "success",
+        });
     } catch (error) {
         return res.status(500).json({ status: "error", message: error })
     }
@@ -150,7 +162,11 @@ const cancelJoinRequest = async (req, res) => {
         group.joinRequests.splice(requestIndex, 1);
 
         await group.save();
-        res.status(200).json({ message: 'Joined Request canceled successfully!' });
+        res.status(200).json({
+            message: 'Joined Request canceled successfully!',
+            group,
+            status: "success",
+        });
     } catch (error) {
         return res.status(500).json({ status: "error", message: error })
     }
@@ -178,7 +194,11 @@ const leaveGroup = async (req, res) => {
 
         await group.save();
 
-        res.status(200).json({ message: 'Left group successfully!' });
+        res.status(200).json({
+            message: 'Left group successfully!',
+            group,
+            status: "success",
+        });
     } catch (error) {
         return res.status(500).json({ status: "error", message: error })
     }
@@ -217,7 +237,11 @@ const kickUser = async (req, res) => {
 
         await group.save();
 
-        res.status(200).json({ message: 'User kicked from the group successfully!' });
+        res.status(200).json({
+            message: 'User kicked from the group successfully!',
+            group,
+            status: "success",
+        });
     } catch (error) {
         return res.status(500).json({ status: "error", message: error })
     }
@@ -225,6 +249,7 @@ const kickUser = async (req, res) => {
 
 
 const deleteGroup = async (req, res) => {
+    console.log("from fdel",req.body);
     const { ID } = req.params;
     const { _id } = req.body?.user; // Assuming you have user authentication in place
     const userId = _id;
@@ -243,7 +268,11 @@ const deleteGroup = async (req, res) => {
         // Delete the group
         await groupsModels.deleteOne({ _id: ID });
 
-        res.status(200).json({ message: 'Group deleted successfully!' });
+        res.status(200).json({
+            message: 'Group deleted successfully!',
+            group,
+            status: "success",
+        });
     } catch (error) {
         return res.status(500).json({ status: "error", message: error })
     }
@@ -299,8 +328,13 @@ const updateGroup = async (req, res) => {
             return res.status(401).json({ message: 'Unauthorized to update group.' });
         }
 
-        const updatedGroup = await groupsModels.updateOne({ _id: ID }, { $set: { title, description, type, avatar } });
-        
+        // const updatedGroup = await groupsModels.updateOne({ _id: ID }, { $set: { title, description, type, avatar } });
+        const updatedGroup = await groupsModels.findByIdAndUpdate(
+            { _id: ID },
+            { title, description, type, avatar },
+            { new: true } // Option to return the updated document
+        );
+
         return res.status(201).json({
             group: updatedGroup,
             status: "success",

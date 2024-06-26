@@ -16,7 +16,7 @@ router.route('/accept/:ID').put(acceptJoinRequest);
 router.route('/cancel/:ID').put(cancelJoinRequest); 
 router.route('/leave/:ID').put(leaveGroup);
 router.route('/kick/:ID').put(kickUser);
-router.route('/delete/:ID').delete(deleteGroup);
+router.route('/delete/:ID').put(deleteGroup);
 
  
 // router.route('/getByAllAuthor').get(verifyToken,getAllUser);
