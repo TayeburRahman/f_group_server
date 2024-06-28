@@ -50,7 +50,7 @@ const getDiscordUser = async (req, res) => {
     });
 
 
-    try {
+  
       const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -102,9 +102,7 @@ const getDiscordUser = async (req, res) => {
         status: "success",
         message: "User registered successfully",
       });
-    } catch (tokenError) { 
-      return res.status(202).json({ status: "success", message: "Failed to obtain access token" });
-    }
+   
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({ status: "error", message: error.message });
