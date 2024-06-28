@@ -268,9 +268,11 @@ const deleteGroup = async (req, res) => {
         // Delete the group
         await groupsModels.deleteOne({ _id: ID });
 
+        const groupUpdate = await groupsModels.find({});
+
         res.status(200).json({
             message: 'Group deleted successfully!',
-            group,
+            group: groupUpdate,
             status: "success",
         });
     } catch (error) {

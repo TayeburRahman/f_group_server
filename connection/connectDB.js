@@ -3,7 +3,12 @@ const mongoose = require('mongoose');
 // connect to the database
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.DATABASE_URL);
+        mongoose.set('strictQuery', false);
+        await mongoose.connect(process.env.DATABASE_URL,{ 
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+            
+        });
         console.log(
             `DB connection successful! at ${new Date().toLocaleString()}`
         );
