@@ -33,82 +33,98 @@ const createUser = async (req, res) => {
   }
 };
 
-const getDiscordUser = async (req, res) => {
+ 
+
+const getDiscordUser = async (req, res) => { 
   try {
-    const { code } = req.query;
+      const code = req.query;
 
-    if (!code) {
-      return res.status(400).json({ status: "error", message: "Authorization code missing or invalid" });
-    }
+      // console.log("code", code)
 
-    const formData = new URLSearchParams({
-      client_id: process.env.DISCORD_C_ID,
-      client_secret: process.env.DISCORD_C_SECRET,
-      code: code.toString(),
-      grant_type: "authorization_code",
-      redirect_uri: process.env.DISCORD_R_URL,
-    });
+      if(code){
+        const formData = new URLSearchParams({
+          client_id: process.env.DISCORD_C_ID,
+          client_secret: process.env.DISCORD_C_SECRET,
+          code: code.code.toString(),
+          grant_type: "authorization_code",
+          redirect_uri: process.env.DISCORD_R_URL,
+        })
+        
+        const output = await axios.post('https://discord.com/api/oauth2/token', 
+          formData,{
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        )
 
+      //  let user= {}
+        if(output.data){
+          const access = output.data.access_token;
 
-  
-      const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
+          const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept-Encoding': 'application/x-www-form-urlencoded'
+          };
 
-      const accessToken = tokenResponse.data.access_token;
+          const userinfo = await axios.get('https://discordapp.com/api/users/@me',{
+            headers: {
+              Authorization: `Bearer ${access}`,
+              ...headers
+            }
+          })
 
-      const userResponse = await axios.get('https://discordapp.com/api/users/@me', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept-Encoding': 'application/x-www-form-urlencoded',
-        },
-      });
+          console.log('userinfo', userinfo)
+        
 
-      const { username, email, avatar, global_name, id } = userResponse.data;
-      const userForm = {
-        name: username,
-        email: email,
-        avatar: avatar,
-        displayName: global_name,
-        password: `Dcd!1${id}`,
-        dId: id,
-        confirmPassword: `Dcd!1${id}`,
-      };
+          if(userinfo){
+            const userForm = {
+              name: userinfo?.data?.username,
+              email: userinfo?.data?.email,
+              avatar: userinfo?.data?.avatar,
+              displayName: userinfo?.data?.global_name,
+              password: `Dcd!1${userinfo?.data?.id}`,
+              dId:userinfo?.data?.id,
+              confirmPassword: `Dcd!1${userinfo?.data?.id}`
 
-      const existingUser = await userModels.findOne({ email: email });
+            } 
+            const existingUser = await userModels.findOne({
+              email: userinfo?.data?.email,
+            });
+            
+            if (existingUser) {
+              console.log('userinfo--', userForm)
+              const token = generateToken(existingUser); 
+              const result = await userModels.updateOne({ email: userinfo.data.email}, {userForm}); 
+              console.log('result--', result, token)
+                 return res.status(200).json({
+                   user: existingUser,
+                   token,
+                   status: "success",
+                   message: "User Update success",
+                 });
+            } 
+            console.log('token--', )
+            const user = await userModels.create(userForm);
+            const token = generateToken(user); 
 
-      if (existingUser) {
-        const token = generateToken(existingUser);
-        await userModels.updateOne({ email: email }, { $set: userForm });
-        console.log("user updated successfully")
-        return res.status(200).json({
-          user: existingUser,
-          token,
-          status: "success",
-          message: "User updated successfully",
-        });
+            return res.status(200).json({
+              user,
+              token,
+              status: "success",
+              message: "User register success",
+            });
+          }
+        }
       }
 
-      const newUser = await userModels.create(userForm);
-      const token = generateToken(newUser);
+      // throw new Error('Authorization code missing or invalid');
 
-      console.log("user updated successfully")
-      return res.status(200).json({
-        user: newUser,
-        token,
-        status: "success",
-        message: "User registered successfully",
-      });
-   
   } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({ status: "error", message: error.message });
+    console.log("error", error) 
+    return res.status(401).json({ status: "error", message: error.massages });
   }
-};
-
+}
 
 
 /**
