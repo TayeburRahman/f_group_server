@@ -1,13 +1,22 @@
 
 const groupsModels = require("../models/groups.models")
+const { isValidDiscordLink } = require("../utils/discordLinkValidator")
 
 
 //  response  
 const createGroup = async (req, res) => {
     try {
-        const { title, description, type, avatar } = req.body?.formData
+        const { title, description, type, avatar, discordInviationLink } = req.body?.formData
         const { _id, displayName } = req.body?.user
         const creator = _id
+
+        // Validate Discord invitation link
+        if (!isValidDiscordLink(discordInviationLink)) {
+            return res.status(400).json({
+                status: "error",
+                message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
+            });
+        }
 
         const group = await groupsModels.create({
             avatar,
@@ -17,7 +26,8 @@ const createGroup = async (req, res) => {
             creator_name: displayName,
             creator,
             members: [creator],
-            type
+            type,
+            discordInviationLink
         })
 
         return res.status(201).json({
@@ -249,7 +259,7 @@ const kickUser = async (req, res) => {
 
 
 const deleteGroup = async (req, res) => {
-    console.log("from fdel",req.body);
+    console.log("from fdel", req.body);
     const { ID } = req.params;
     const { _id } = req.body?.user; // Assuming you have user authentication in place
     const userId = _id;
@@ -314,9 +324,17 @@ const updateGroup = async (req, res) => {
     const { ID } = req.params;
     const { _id } = req.body?.user;
     const userId = _id;
-    const { title, description, type, avatar } = req.body?.formData
+    const { title, description, type, avatar, discordInviationLink } = req.body?.formData
 
     try {
+
+        // Validate Discord invitation link
+        if (!isValidDiscordLink(discordInviationLink)) {
+            return res.status(400).json({
+                status: "error",
+                message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
+            });
+        }
 
         const group = await groupsModels.findById(ID);
         if (!group) {
@@ -331,7 +349,7 @@ const updateGroup = async (req, res) => {
         // const updatedGroup = await groupsModels.updateOne({ _id: ID }, { $set: { title, description, type, avatar } });
         const updatedGroup = await groupsModels.findByIdAndUpdate(
             { _id: ID },
-            { title, description, type, avatar },
+            { title, description, type, avatar, discordInviationLink },
             { new: true } // Option to return the updated document
         );
 
