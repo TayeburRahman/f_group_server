@@ -34,20 +34,24 @@ const groupModel = new mongoose.Schema(
         ,
         joinRequests: {
             type: [
-              {
-                user: { // User reference using ObjectId and ref
-                  type: mongoose.Schema.Types.ObjectId,
-                  ref: 'users',
-                  required: true,
+                {
+                    user: { // User reference using ObjectId and ref
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'users',
+                        required: true,
+                    },
+                    date: {
+                        type: Date,
+                        default: Date.now,
+                    },
                 },
-                date: {
-                  type: Date,
-                  default: Date.now,
-                },
-              },
             ],
             default: [],
-          },
+        },
+        discordInviationLink: {
+            type: String,
+            trim: true
+        },
         eventChangeAt: Date,
     }
 );
