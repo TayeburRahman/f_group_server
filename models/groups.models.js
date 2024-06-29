@@ -48,7 +48,7 @@ const groupModel = new mongoose.Schema(
             ],
             default: [],
         },
-        discordInviationLink: {
+        discordInvitationLink: {
             type: String,
             trim: true
         },

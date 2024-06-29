@@ -5,11 +5,11 @@ const { isValidDiscordLink } = require("../utils/discordLinkValidator")
 //  response  
 const createGroup = async (req, res) => {
     try {
-        const { title, description, type, avatar, discordInviationLink } = req.body?.formData
+        const { title, description, type, avatar, discordInvitationLink } = req.body?.formData
         const { _id, displayName } = req.body?.user
         const creator = _id
 
-        if (!isValidDiscordLink(discordInviationLink)) {
+        if (!isValidDiscordLink(discordInvitationLink)) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
@@ -23,7 +23,8 @@ const createGroup = async (req, res) => {
             creator_name: displayName,
             creator,
             members: [creator],
-            type
+            type,
+            discordInvitationLink
         })
 
         return res.status(201).json({
@@ -322,12 +323,12 @@ const updateGroup = async (req, res) => {
     const { ID } = req.params;
     const { _id } = req.body?.user;
     const userId = _id;
-    const { title, description, type, avatar, discordInviationLink } = req.body?.formData
+    const { title, description, type, avatar, discordInvitationLink } = req.body?.formData
 
     try {
 
         // Validate Discord invitation link
-        if (!isValidDiscordLink(discordInviationLink)) {
+        if (!isValidDiscordLink(discordInvitationLink)) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
@@ -347,7 +348,7 @@ const updateGroup = async (req, res) => {
         // const updatedGroup = await groupsModels.updateOne({ _id: ID }, { $set: { title, description, type, avatar } });
         const updatedGroup = await groupsModels.findByIdAndUpdate(
             { _id: ID },
-            { title, description, type, avatar },
+            { title, description, type, avatar, discordInvitationLink },
             { new: true } // Option to return the updated document
         );
 
@@ -360,35 +361,5 @@ const updateGroup = async (req, res) => {
         return res.status(500).json({ status: "error", message: error })
     }
 }
-
-
-// const updateGroupAvatar = async (req, res) => {
-
-//     try {
-//         const { title, date, description, type } = req.body?.formData
-
-//         const { ID } = req.params
-
-
-//         let avatar = ''
-//         if (req.file) {
-//             avatar = req.file.path
-//         }
-
-
-//         const group = await eventsModels.updateOne({ _id: ID }, { $set: { avatar, title, date, description, type } })
-
-//         return res.status(201).json({
-//             group,
-//             status: "success",
-//             message: 'Group Updated successfully'
-//         });
-//     } catch (error) {
-//         return res.status(500).json({ status: "error", message: error })
-//     }
-// }
-
-
-
 
 module.exports = { createGroup, joinGroup, leaveGroup, kickUser, deleteGroup, getGroups, getGroupById, getGroupsByUserId, updateGroup, acceptJoinRequest, cancelJoinRequest }
