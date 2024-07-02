@@ -26,7 +26,7 @@ const groupModel = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["public", "private"],
+            enum: ["public", "private", 'hidden'],
             default: "public"
         },
         members:

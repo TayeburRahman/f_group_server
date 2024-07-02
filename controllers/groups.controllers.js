@@ -329,12 +329,12 @@ const updateGroup = async (req, res) => {
     try {
 
         // Validate Discord invitation link
-        if (!isValidDiscordLink(discordInvitationLink)) {
-            return res.status(400).json({
-                status: "error",
-                message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
-            });
-        }
+        // if (!isValidDiscordLink(discordInvitationLink)) {
+        //     return res.status(400).json({
+        //         status: "error",
+        //         message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
+        //     });
+        // }
 
         const group = await groupsModels.findById(ID);
         if (!group) {
