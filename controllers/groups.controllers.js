@@ -9,12 +9,13 @@ const createGroup = async (req, res) => {
         const { _id, displayName } = req.body?.user
         const creator = _id
 
-        if (!isValidDiscordLink(discordInvitationLink)) {
-            return res.status(400).json({
-                status: "error",
-                message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
-            });
-        }
+        // if (!isValidDiscordLink(discordInvitationLink)) {
+        //     return res.status(400).json({
+        //         status: "error",
+        //         message: "Invalid Discord invitation link. Only links from discord.gg or discord.com are allowed."
+        //     });
+        // }
+
         const group = await groupsModels.create({
             avatar,
             title,

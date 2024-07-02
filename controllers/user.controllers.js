@@ -103,8 +103,7 @@ const getDiscordUser = async (req, res) => {
                    status: "success",
                    message: "User Update success",
                  });
-            } 
-            console.log('token--', )
+            }  
             const user = await userModels.create(userForm);
             const token = generateToken(user); 
 
